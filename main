@@ -1,0 +1,39 @@
+import telebot
+import os
+import requests
+
+
+
+tg_token = os.environ.get('TGAPI')
+bot = telebot.TeleBot(tg_token)
+
+
+# Command /start
+@bot.message_handler(commands=['start'])  # команда start
+def start(message):
+    bot.send_message(message.chat.id, "Приветствую в нашем телеграм боте! ")
+
+
+@bot.message_handler(content_types=['text'])
+def get_wweather(message):
+    # Принимаем название города
+    url = 'https://api.openweathermap.org/data/2.5/weather'
+    weather_api = os.environ.get('WEATHERAPI')
+    params = {'q': message.text,
+              'units': 'metric',
+              'appid': weather_api,
+              'lang': 'ru'
+              }
+    r = requests.get(url, params=params).json()
+    answer = f'Город {r["name"]}. Сейчас {r["weather"][0]["description"]}. Температура: {r["main"]["temp"]} C. Ощущается как: {r["main"]["feels_like"]} C'
+    bot.send_message(message.chat.id, text=answer)
+
+
+
+
+# Start bot
+if __name__ == '__main__':
+    bot.polling(none_stop=True)
+
+
+
